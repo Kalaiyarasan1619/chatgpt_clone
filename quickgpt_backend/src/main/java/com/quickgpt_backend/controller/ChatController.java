@@ -12,7 +12,6 @@ import com.quickgpt_backend.service.ChatService;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin
 public class ChatController {
 
     @Autowired

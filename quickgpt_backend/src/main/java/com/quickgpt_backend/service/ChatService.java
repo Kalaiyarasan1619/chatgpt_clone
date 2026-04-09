@@ -20,7 +20,8 @@ public class ChatService {
     @Autowired
     private ChatRepository chatRepository;
 
-    private final WebClient webClient = WebClient.create("http://localhost:8000");
+    @Autowired
+    private WebClient webClient;
 
     public String getAIResponse(String message) {
 

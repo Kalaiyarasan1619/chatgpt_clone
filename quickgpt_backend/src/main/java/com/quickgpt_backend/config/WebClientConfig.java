@@ -1,5 +1,6 @@
 package com.quickgpt_backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -8,9 +9,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    public WebClient webClient() {
+    public WebClient webClient(@Value("${ai.service.url}") String aiServiceUrl) {
+        String base = aiServiceUrl == null ? "" : aiServiceUrl.replaceAll("/+$", "");
         return WebClient.builder()
-                .baseUrl("http://localhost:8000")
+                .baseUrl(base)
                 .build();
     }
 }
