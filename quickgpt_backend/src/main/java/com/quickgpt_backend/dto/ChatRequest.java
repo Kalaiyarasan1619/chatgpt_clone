@@ -12,6 +12,7 @@ import lombok.Setter;
 
 public class ChatRequest {
     private String message;
+    private Integer pageId;
 
     public String getMessage() {
         return message;
@@ -19,6 +20,14 @@ public class ChatRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Integer getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(Integer pageId) {
+        this.pageId = pageId;
     }
 
 

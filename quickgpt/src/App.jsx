@@ -31,7 +31,7 @@ const App = () => {
         <div className="flex h-screen w-screen">
           <Sidebar isMenuOpen= {isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
           <Routes>
-            <Route path="/" element={<ChatBox />} />F
+            <Route path="/" element={<ChatBox />} />
             <Route path="/credits" element={<Credits />} />
             <Route path="/community" element={<Community />} />
           </Routes>

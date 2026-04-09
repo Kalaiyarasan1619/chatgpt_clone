@@ -15,27 +15,78 @@ export const AppContextProvider = ({ children }) => {
     setUser(dummyUserData);
   };
 
- const fetchUsersChats = async () => {
-  try {
-    const res = await fetch("http://localhost:8080/api/chat/history");
-    const data = await res.json();
+  const normalizePageId = (v) => {
+    const n =
+      typeof v === "number" && Number.isFinite(v)
+        ? Math.trunc(v)
+        : parseInt(String(v ?? ""), 10);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  };
 
-    const initialChat = {
-      _id: 1,
-      messages: data.flatMap(chat => [
-        { role: "user", content: chat.message },
-        { role: "assistant", content: chat.response }
-      ]),
-      updatedAt: new Date()
+  const mapApiChatRowToClient = (chat) => {
+    const id = chat?.id ?? chat?.chat_id;
+    const pageRaw = chat?.pageId ?? chat?.page_id;
+    return {
+      _id: id != null ? Number(id) : Date.now(),
+      pageId: normalizePageId(pageRaw),
+      messages: [
+        { role: "user", content: String(chat?.message ?? "") },
+        { role: "assistant", content: String(chat?.response ?? "") },
+      ],
+      updatedAt: new Date(),
     };
+  };
 
-    setChats([initialChat]);
-    setSelectedChat(initialChat);
+  const mergeApiRowsToThread = (rows) => {
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    const sorted = [...rows].sort((a, b) => Number(a.id) - Number(b.id));
+    const messages = sorted.flatMap((r) => [
+      { role: "user", content: r.message ?? "" },
+      { role: "assistant", content: r.response ?? "" },
+    ]);
+    const last = sorted[sorted.length - 1];
+    return {
+      _id: last.id,
+      pageId: normalizePageId(last.pageId),
+      messages,
+      updatedAt: new Date(),
+    };
+  };
 
-  } catch (err) {
-    console.error("Error loading chats:", err);
-  }
-};
+  /** Loads full DB thread for a page_id (all turns). */
+  const loadThreadByPageId = async (pageId) => {
+    const pid = normalizePageId(pageId);
+    try {
+      const res = await fetch(`http://localhost:8080/api/chat/page/${pid}`);
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data) || data.length === 0) return null;
+      return mergeApiRowsToThread(data);
+    } catch {
+      return null;
+    }
+  };
+
+  const fetchUsersChats = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/chat/recent");
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("Error loading recent chats:", data);
+        return;
+      }
+      if (!Array.isArray(data)) {
+        console.error("Recent chats is not an array:", data);
+        return;
+      }
+
+      const mappedChats = data.map(mapApiChatRowToClient);
+
+      setChats(mappedChats);
+      setSelectedChat(mappedChats[0] || null);
+    } catch (err) {
+      console.error("Error loading chats:", err);
+    }
+  };
 
   useEffect(() => {
     if(theme === 'dark'){
@@ -45,11 +96,10 @@ export const AppContextProvider = ({ children }) => {
     }
   },[theme])
 
- useEffect(() => {
-  if (user && chats.length === 0) {
+  useEffect(() => {
+    if (!user) return;
     fetchUsersChats();
-  }
-}, [user]);
+  }, [user]);
 
   useEffect(() => {
     fetchUser();
@@ -64,6 +114,7 @@ export const AppContextProvider = ({ children }) => {
     setChats,
     selectedChat,
     setSelectedChat,
+    loadThreadByPageId,
     theme,
     setTheme,
   };

@@ -80,6 +80,14 @@ const EmptyState = ({ theme }) => (
   </div>
 );
 
+const normalizePageId = (v) => {
+  const n =
+    typeof v === "number" && Number.isFinite(v)
+      ? Math.trunc(v)
+      : parseInt(String(v ?? ""), 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+};
+
 const ChatBox = () => {
  const { chats, setChats, selectedChat, setSelectedChat, theme } = useAppContext();
   const [messages, setMessages] = useState([]);
@@ -111,8 +119,9 @@ const ChatBox = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || !selectedChat) return;
     setLoading(true); // ✅
+    const resolvedPageId = normalizePageId(selectedChat?.pageId);
 
    const userMessage = { role: "user", content: prompt, timestamp: new Date() };
 
@@ -122,7 +131,8 @@ setMessages((prev) => {
   const updatedChat = {
     ...selectedChat,
     messages: updated,
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    pageId: resolvedPageId,
   };
 
   setSelectedChat(updatedChat);
@@ -142,7 +152,10 @@ setMessages((prev) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ message: prompt }),
+    body: JSON.stringify({
+      message: prompt,
+      pageId: resolvedPageId,
+    }),
   });
 
   const data = await res.json(); // ✅ THIS WAS MISSING
@@ -160,6 +173,7 @@ setMessages((prev) => {
       ...selectedChat,
       messages: updatedMessages,
       updatedAt: new Date(),
+      pageId: resolvedPageId,
     };
 
     setSelectedChat(updatedChat);

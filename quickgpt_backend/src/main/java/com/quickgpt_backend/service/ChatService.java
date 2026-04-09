@@ -1,5 +1,6 @@
 package com.quickgpt_backend.service;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +39,11 @@ public class ChatService {
 return response.getReply();
     }
 
-    public void saveChat(String message, String response) {
+    public void saveChat(String message, String response, Integer pageId) {
         Chat chat = new Chat();
         chat.setMessage(message);
         chat.setResponse(response);
+        chat.setPageId(pageId == null || pageId <= 0 ? 1 : pageId);
         chatRepository.save(chat);
     }
 
@@ -49,7 +51,21 @@ return response.getReply();
         return chatRepository.findAll();
     }
 
-    
+    /**
+     * One row per page_id (lowest id per page, per PostgreSQL DISTINCT ON).
+     * Sorted with newest conversation first (highest row id) for the sidebar.
+     */
+    public List<Chat> getRecentDistinctByPageId() {
+        List<Chat> rows = chatRepository.findDistinctFirstRowPerPageId();
+        rows.sort(Comparator.comparing(Chat::getId, Comparator.nullsFirst(Long::compareTo)).reversed());
+        return rows;
+    }
 
-    
+    public List<Chat> getChatsByPageId(Integer pageId) {
+        if (pageId == null || pageId <= 0) {
+            pageId = 1;
+        }
+        return chatRepository.findByPageIdOrderByIdAsc(pageId);
+    }
+
 }

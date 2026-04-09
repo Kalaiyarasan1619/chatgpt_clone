@@ -25,6 +25,9 @@ public class Chat {
     @Column(columnDefinition = "TEXT")
     private String response;
 
+    @Column
+    private Integer pageId;
+
     public Long getId() {
         return id;
     }
@@ -47,5 +50,13 @@ public class Chat {
 
     public void setResponse(String response) {
         this.response = response;
+    }
+
+    public Integer getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(Integer pageId) {
+        this.pageId = pageId;
     }
 }
