@@ -31,3 +31,7 @@ app.include_router(legacy_router)
 @app.get("/")
 def root():
     return {"status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
