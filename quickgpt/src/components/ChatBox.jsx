@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { API_BASE_URL } from "../apiConfig";
 import { useAppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
 import Message from "./Message";
@@ -147,7 +148,7 @@ setMessages((prev) => {
 });
 
    try {
-  const res = await fetch("http://localhost:8080/api/chat", {
+  const res = await fetch(`${API_BASE_URL}/api/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

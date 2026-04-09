@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyChats, dummyUserData } from "../assets/assets";
+import { API_BASE_URL } from "../apiConfig";
+import { dummyUserData } from "../assets/assets";
 
 const AppContext = createContext();
 
@@ -57,7 +58,7 @@ export const AppContextProvider = ({ children }) => {
   const loadThreadByPageId = async (pageId) => {
     const pid = normalizePageId(pageId);
     try {
-      const res = await fetch(`http://localhost:8080/api/chat/page/${pid}`);
+      const res = await fetch(`${API_BASE_URL}/api/chat/page/${pid}`);
       const data = await res.json();
       if (!res.ok || !Array.isArray(data) || data.length === 0) return null;
       return mergeApiRowsToThread(data);
@@ -68,7 +69,7 @@ export const AppContextProvider = ({ children }) => {
 
   const fetchUsersChats = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/chat/recent");
+      const res = await fetch(`${API_BASE_URL}/api/chat/recent`);
       const data = await res.json();
       if (!res.ok) {
         console.error("Error loading recent chats:", data);
