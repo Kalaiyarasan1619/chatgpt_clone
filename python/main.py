@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -32,9 +32,11 @@ app.include_router(legacy_router)
 def root():
     return {"status": "ok"}
 
+
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
 
 @app.head("/health")
 def health_head():
