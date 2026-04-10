@@ -35,3 +35,7 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+@app.head("/health")
+def health_head():
+    return Response(status_code=200)
